@@ -14,12 +14,15 @@ use tracing_subscriber::{EnvFilter, fmt, Registry};
 use tracing_subscriber::fmt::time::ChronoLocal;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
+
 use migration::{Migrator, MigratorTrait};
-use crate::config::core::{CoreConfig};
+
+use crate::config::core::CoreConfig;
 use crate::config::get_config;
 
 mod config;
 mod controller;
+mod model;
 
 lazy_static! {
     static ref CORE_CONFIG: CoreConfig = get_config("core");
@@ -28,15 +31,18 @@ lazy_static! {
         opt.sqlx_logging(true);
         opt.sqlx_logging_level(LevelFilter::Info);
         futures::executor::block_on(Database::connect(opt)).unwrap_or_else(|e| {
-            panic!("Failed to connect to database '{}': {}", CORE_CONFIG.db_uri, e)
+            panic!(
+                "Failed to connect to database '{}': {}",
+                CORE_CONFIG.db_uri, e
+            )
         })
     };
 }
 
 #[tokio::main]
 async fn main() {
-    let env_filter =
-        EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(&CORE_CONFIG.trace_level));
+    let env_filter = EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| EnvFilter::new(&CORE_CONFIG.trace_level));
     let file_appender = RollingFileAppender::builder()
         .rotation(Rotation::DAILY)
         .filename_suffix("log")
@@ -59,10 +65,10 @@ async fn main() {
         .init();
 
     Migrator::up(&*DATABASE, None).await.unwrap();
-    
+
     let app = controller::all_routers()
         .layer(TraceLayer::new(
-            StatusInRangeAsFailures::new(400..=599).into_make_classifier()
+            StatusInRangeAsFailures::new(400..=599).into_make_classifier(),
         ))
         .layer(DefaultBodyLimit::max(
             CORE_CONFIG.max_body_size * 1024 * 1024,
@@ -75,10 +81,9 @@ async fn main() {
 
     if CORE_CONFIG.tls {
         debug!("HTTPS enabled.");
-        let tls_config =
-            RustlsConfig::from_pem_file(&CORE_CONFIG.ssl_cert, &CORE_CONFIG.ssl_key)
-                .await
-                .unwrap();
+        let tls_config = RustlsConfig::from_pem_file(&CORE_CONFIG.ssl_cert, &CORE_CONFIG.ssl_key)
+            .await
+            .unwrap();
         axum_server::bind_rustls(addr, tls_config)
             .serve(app.into_make_service())
             .await

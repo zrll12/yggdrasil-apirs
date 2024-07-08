@@ -19,4 +19,3 @@ pub struct CoreConfig {
     #[serde_inline_default(2)]
     pub max_body_size: usize,
 }
-
