@@ -1,0 +1,10 @@
+/target
+/migration/target/
+/config/
+/logs/
+
+#idea
+/.idea/.gitignore
+/.idea/modules.xml
+/.idea/vcs.xml
+/.idea/web_template.iml
