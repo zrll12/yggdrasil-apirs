@@ -14,7 +14,7 @@ use tracing_subscriber::{EnvFilter, fmt, Registry};
 use tracing_subscriber::fmt::time::ChronoLocal;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
-
+use uuid::Uuid;
 use migration::{Migrator, MigratorTrait};
 
 use crate::config::core::CoreConfig;
@@ -23,6 +23,7 @@ use crate::config::get_config;
 mod config;
 mod controller;
 mod model;
+mod service;
 
 lazy_static! {
     static ref CORE_CONFIG: CoreConfig = get_config("core");
