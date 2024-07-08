@@ -24,15 +24,21 @@ serde_json = "1.0.120"
 serde-inline-default = "0.2.0"
 toml = "0.8.14"
 
-#tools
-lazy_static = "1.5.0"
-tokio = "1.38.0"
-
 #database
 migration = {path = "migration"}
 sea-orm = { version = "0.12.15", features = ["macros", "sqlx-postgres", "runtime-tokio-rustls"] }
+
+#algorithm
+pbkdf2 = "0.12.2"
+sha2 = "0.10.8"
+base64 = "0.22.1"
+uuid = { version =  "1.9.1", features = ["v4", "fast-rng", "macro-diagnostics"] }
+
+#tools
+lazy_static = "1.5.0"
+tokio = "1.38.0"
 futures = "0.3.30"
-uuid = "1.9.1"
+rand = "0.8.5"
 
 
 [build-dependencies]

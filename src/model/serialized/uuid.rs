@@ -47,3 +47,11 @@ impl Display for UuidNoChar {
         write!(f, "{}", self.uuid.to_string().replace("-", ""))
     }
 }
+
+impl UuidNoChar {
+    pub fn new() -> Self {
+        UuidNoChar {
+            uuid: Uuid::new_v4(),
+        }
+    }
+}
