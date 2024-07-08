@@ -18,9 +18,11 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(ColumnDef::new(Profile::Name).string().not_null())
-                    .col(ColumnDef::new(Profile::Model).integer().not_null())
+                    .col(ColumnDef::new(Profile::Model).integer().default(0).not_null())
                     .col(ColumnDef::new(Profile::SkinTexture).string().null())
                     .col(ColumnDef::new(Profile::CapeTexture).string().null())
+                    .col(ColumnDef::new(Profile::CreateTime).timestamp().default(Expr::current_timestamp()).not_null())
+                    .col(ColumnDef::new(Profile::UpdateTime).timestamp().default(Expr::current_timestamp()).not_null())
                     .to_owned(),
             )
             .await
@@ -41,4 +43,6 @@ enum Profile {
     Model,
     SkinTexture,
     CapeTexture,
+    CreateTime,
+    UpdateTime,
 }

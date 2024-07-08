@@ -18,9 +18,11 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(ColumnDef::new(User::Email).string().unique_key().not_null())
-                    .col(ColumnDef::new(User::Password).string().not_null())
-                    .col(ColumnDef::new(User::ProfileId).string().null())
+                    .col(ColumnDef::new(User::Password).string_len(65).not_null())
+                    .col(ColumnDef::new(User::ProfileId).string().not_null())
                     .col(ColumnDef::new(User::PreferredLanguage).string().null())
+                    .col(ColumnDef::new(User::CreateTime).timestamp().default(Expr::current_timestamp()).not_null())
+                    .col(ColumnDef::new(User::UpdateTime).timestamp().default(Expr::current_timestamp()).not_null())
                     .to_owned(),
             )
             .await
@@ -41,4 +43,6 @@ enum User {
     Password,
     ProfileId,
     PreferredLanguage,
+    CreateTime,
+    UpdateTime,
 }

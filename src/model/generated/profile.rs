@@ -11,6 +11,8 @@ pub struct Model {
     pub model: i32,
     pub skin_texture: Option<String>,
     pub cape_texture: Option<String>,
+    pub create_time: DateTime,
+    pub update_time: DateTime,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
