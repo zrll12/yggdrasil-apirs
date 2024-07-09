@@ -2,16 +2,18 @@ use axum::Json;
 use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, NotSet};
 use serde::Deserialize;
-use crate::controller::user::password::generate_password_hash;
+use crate::service::password::generate_password_hash;
 use crate::DATABASE;
 use crate::model::serialized::uuid::UuidNoChar;
 
 pub async fn create_user(Json(request): Json<CreateUserRequest>) {
     let profile_id = UuidNoChar::new().to_string();
+    let user_id = UuidNoChar::new().to_string();
     crate::model::generated::profile::ActiveModel {
         id: Set(profile_id.clone()),
         name: Set(request.name),
         model: NotSet,
+        owner_id: Set(user_id.clone()),
         skin_texture: NotSet,
         cape_texture: NotSet,
         create_time: NotSet,
@@ -19,7 +21,7 @@ pub async fn create_user(Json(request): Json<CreateUserRequest>) {
     }.insert(&*DATABASE).await.unwrap();
     
     crate::model::generated::user::ActiveModel {
-        id: Set(UuidNoChar::new().to_string()),
+        id: Set(user_id),
         email: Set(request.email),
         password: Set(generate_password_hash(&request.password)),
         profile_id: Set(profile_id),

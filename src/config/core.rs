@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_inline_default::serde_inline_default;
+use crate::CORE_CONFIG;
 
 #[serde_inline_default]
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -18,4 +19,12 @@ pub struct CoreConfig {
     pub ssl_key: String,
     #[serde_inline_default(2)]
     pub max_body_size: usize,
+}
+
+pub fn get_server_base_url() -> String {
+    if CORE_CONFIG.tls {
+        format!("https://{}", CORE_CONFIG.server_addr)
+    } else {
+        format!("http://{}", CORE_CONFIG.server_addr)
+    }
 }

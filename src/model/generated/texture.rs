@@ -3,17 +3,12 @@
 use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
-#[sea_orm(table_name = "profile")]
+#[sea_orm(table_name = "texture")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: String,
-    pub name: String,
     pub model: String,
-    pub owner_id: String,
-    pub skin_texture: Option<String>,
-    pub cape_texture: Option<String>,
-    pub create_time: DateTime,
-    pub update_time: DateTime,
+    pub upload_time: DateTime,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

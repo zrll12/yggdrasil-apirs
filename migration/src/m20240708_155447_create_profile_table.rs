@@ -18,7 +18,8 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(ColumnDef::new(Profile::Name).string().not_null())
-                    .col(ColumnDef::new(Profile::Model).integer().default(0).not_null())
+                    .col(ColumnDef::new(Profile::Model).string_len(10).default("default".to_string()).not_null())
+                    .col(ColumnDef::new(Profile::OwnerId).string().not_null())
                     .col(ColumnDef::new(Profile::SkinTexture).string().null())
                     .col(ColumnDef::new(Profile::CapeTexture).string().null())
                     .col(ColumnDef::new(Profile::CreateTime).timestamp().default(Expr::current_timestamp()).not_null())
@@ -41,6 +42,7 @@ enum Profile {
     Id,
     Name,
     Model,
+    OwnerId,
     SkinTexture,
     CapeTexture,
     CreateTime,

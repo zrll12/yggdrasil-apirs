@@ -3,4 +3,5 @@
 pub mod prelude;
 
 pub mod profile;
+pub mod texture;
 pub mod user;

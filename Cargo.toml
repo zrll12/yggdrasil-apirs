@@ -27,6 +27,7 @@ toml = "0.8.14"
 #database
 migration = {path = "migration"}
 sea-orm = { version = "0.12.15", features = ["macros", "sqlx-postgres", "runtime-tokio-rustls"] }
+moka = { version = "0.12.8", features = ["future"] }
 
 #algorithm
 pbkdf2 = "0.12.2"
@@ -39,6 +40,7 @@ lazy_static = "1.5.0"
 tokio = "1.38.0"
 futures = "0.3.30"
 rand = "0.8.5"
+chrono = "0.4.38"
 
 
 [build-dependencies]
