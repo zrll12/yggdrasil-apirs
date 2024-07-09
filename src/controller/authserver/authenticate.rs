@@ -39,7 +39,11 @@ pub async fn authenticate(Json(request): Json<AuthenticateRequest>) -> Result<St
         client_token,
         available_profiles: profiles,
         selected_profile,
-        user,
+        user: if request.request_user == Some(true) {
+            Some(user)
+        } else {
+            None
+        },
     };
 
     Ok(serde_json::to_string(&response).unwrap())
@@ -61,5 +65,5 @@ pub struct AuthenticateResponse {
     pub client_token: String,
     pub available_profiles: Vec<SerializedProfile>,
     pub selected_profile: Option<SerializedProfile>,
-    pub user: SerializedUser,
+    pub user: Option<SerializedUser>,
 }
