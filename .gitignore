@@ -2,6 +2,7 @@
 /migration/target/
 /config/
 /logs/
+/keys/
 
 #idea
 /.idea/.gitignore
