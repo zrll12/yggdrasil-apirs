@@ -10,7 +10,7 @@ use crate::model::serialized::user::SerializedUser;
 use crate::service::password::verify_password;
 use crate::service::token::sign_new_token;
 
-pub async fn authenticate(Json(request): Json<AuthenticateRequest>) -> Result<AuthenticateResponse, ErrorResponse> {
+pub async fn authenticate(Json(request): Json<AuthenticateRequest>) -> Result<String, ErrorResponse> {
     let user = User::find()
         .filter(crate::model::generated::user::Column::Email.eq(request.username))
         .one(&*DATABASE)
@@ -34,14 +34,15 @@ pub async fn authenticate(Json(request): Json<AuthenticateRequest>) -> Result<Au
         .find(|profile| profile.id == user.profile_id).cloned();
     
     let user = SerializedUser::from(user);
-
-    Ok(AuthenticateResponse {
+    let response = AuthenticateResponse {
         access_token,
         client_token,
         available_profiles: profiles,
         selected_profile,
         user,
-    })
+    };
+
+    Ok(serde_json::to_string(&response).unwrap())
 }
 
 #[derive(Deserialize, Clone, Debug)]

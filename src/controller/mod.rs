@@ -5,11 +5,35 @@ use axum::{Router};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::routing::get;
+use rsa::pkcs1::EncodeRsaPublicKey;
+use rsa::pkcs8::LineEnding;
+use serde::Serialize;
+use crate::config::core::get_server_base_url;
+use crate::service::crypto::SIGNATURE_KEY_PAIR;
 
 pub fn all_routers() -> Router {
     Router::new()
+        .route("/", get(ping))
         .nest("/user", user::get_routers())
         .nest("/authserver", authserver::get_routers())
+}
+
+pub async fn ping() -> String {
+    let meta = PingMeta {
+        meta: "".to_string(),
+        skin_domains: vec![get_server_base_url()],
+        signature_publickey: SIGNATURE_KEY_PAIR.1.to_pkcs1_pem(LineEnding::LF).unwrap().to_string(),
+    };
+    
+    serde_json::to_string(&meta).unwrap()
+}
+
+#[derive(Serialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct PingMeta {
+    pub meta: String,
+    pub skin_domains: Vec<String>,
+    pub signature_publickey: String,
 }
 
 pub enum ErrorResponses {
