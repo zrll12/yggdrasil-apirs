@@ -1,14 +1,15 @@
 use axum::routing::post;
 use axum::Router;
 
-use crate::controller::authserver::authenticate::authenticate;
-use crate::controller::authserver::refresh::refresh;
-
 mod authenticate;
+mod invalidate;
 mod refresh;
+mod validate;
 
 pub fn get_routers() -> Router {
     Router::new()
-        .route("/authenticate", post(authenticate))
-        .route("/refresh", post(refresh))
+        .route("/authenticate", post(authenticate::authenticate))
+        .route("/refresh", post(refresh::refresh))
+        .route("/validate", post(validate::validate))
+        .route("/invalidate", post(invalidate::invalidate))
 }

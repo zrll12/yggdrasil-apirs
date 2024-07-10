@@ -4,13 +4,13 @@ use sea_orm::ActiveValue::Set;
 use serde::{Deserialize, Serialize};
 
 use crate::controller::{ErrorResponse, ErrorResponses};
+use crate::DATABASE;
 use crate::model::generated::prelude::{Profile, User};
 use crate::model::serialized::profile::SerializedProfile;
 use crate::model::serialized::user::SerializedUser;
 use crate::service::token::{
     check_token_state, get_token_info, invalidate_token, sign_new_token, TokenState,
 };
-use crate::DATABASE;
 
 pub async fn refresh(Json(request): Json<RefreshRequest>) -> Result<String, ErrorResponse> {
     if check_token_state(&request.access_token, request.client_token.clone()).await == TokenState::Invalid {
