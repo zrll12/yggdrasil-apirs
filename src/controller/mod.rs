@@ -1,5 +1,6 @@
 mod user;
-mod authserver;
+mod auth_server;
+mod session_server;
 
 use axum::{Router};
 use axum::http::StatusCode;
@@ -15,7 +16,8 @@ pub fn all_routers() -> Router {
     Router::new()
         .route("/", get(ping))
         .nest("/user", user::get_routers())
-        .nest("/authserver", authserver::get_routers())
+        .nest("/authserver", auth_server::get_routers())
+        .nest("/sessionserver/session", session_server::get_routers())
 }
 
 pub async fn ping() -> String {

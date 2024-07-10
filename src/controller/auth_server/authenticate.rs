@@ -4,7 +4,7 @@ use sea_orm::{ColumnTrait, EntityTrait};
 use serde::{Deserialize, Serialize};
 
 use crate::controller::{ErrorResponse, ErrorResponses};
-use crate::controller::authserver::RATE_LIMIT_CACHE;
+use crate::controller::auth_server::RATE_LIMIT_CACHE;
 use crate::model::generated::prelude::User;
 use crate::model::serialized::profile::SerializedProfile;
 use crate::model::serialized::user::SerializedUser;

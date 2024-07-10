@@ -4,7 +4,7 @@ use sea_orm::{EntityTrait, QueryFilter, ColumnTrait};
 use serde::Deserialize;
 use crate::AUTH_CONFIG;
 use crate::controller::{ErrorResponse, ErrorResponses};
-use crate::controller::authserver::RATE_LIMIT_CACHE;
+use crate::controller::auth_server::RATE_LIMIT_CACHE;
 use crate::service::password::verify_password;
 use crate::service::token::invalidate_tokens;
 
