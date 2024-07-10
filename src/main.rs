@@ -14,7 +14,7 @@ use tracing_subscriber::{EnvFilter, fmt, Registry};
 use tracing_subscriber::fmt::time::ChronoLocal;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
-use uuid::Uuid;
+
 use migration::{Migrator, MigratorTrait};
 
 use crate::config::core::CoreConfig;

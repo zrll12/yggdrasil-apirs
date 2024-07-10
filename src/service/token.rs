@@ -1,10 +1,11 @@
 use std::sync::Arc;
-use crate::model::serialized::uuid::UuidNoChar;
+use std::time::Duration;
+
 use chrono::{DateTime, Utc};
 use lazy_static::lazy_static;
-use log::{debug, info, warn};
 use moka::future::Cache;
-use std::time::Duration;
+
+use crate::model::serialized::uuid::UuidNoChar;
 
 lazy_static! {
     static ref TOKEN_CACHE: Cache<String, TokenInfo> = Cache::builder()

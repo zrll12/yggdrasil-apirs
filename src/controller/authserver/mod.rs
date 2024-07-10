@@ -13,4 +13,5 @@ pub fn get_routers() -> Router {
         .route("/refresh", post(refresh::refresh))
         .route("/validate", post(validate::validate))
         .route("/invalidate", post(invalidate::invalidate))
+        .route("/signout", post(signout::signout))
 }

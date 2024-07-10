@@ -45,12 +45,18 @@ pub async fn refresh(Json(request): Json<RefreshRequest>) -> Result<String, Erro
     invalidate_token(&request.access_token).await;
     let (access_token, client_token) =
         sign_new_token(token_info.user_id.clone(), Some(token_info.client_token)).await;
+    
+    let user = if request.request_user.is_some() && request.request_user.unwrap() { 
+        Some(SerializedUser::from(user))
+    } else {
+        None
+    };
 
     let response = RefreshResponse {
         access_token,
         client_token,
         selected_profile: None,
-        user: Some(SerializedUser::from(user)),
+        user,
     };
 
     Ok(serde_json::to_string(&response).unwrap())
