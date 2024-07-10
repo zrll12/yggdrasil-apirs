@@ -5,6 +5,7 @@ mod authenticate;
 mod invalidate;
 mod refresh;
 mod validate;
+mod signout;
 
 pub fn get_routers() -> Router {
     Router::new()
