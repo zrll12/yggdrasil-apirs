@@ -4,6 +4,7 @@ use sea_orm::{ColumnTrait, EntityTrait};
 use serde::{Deserialize, Serialize};
 
 use crate::controller::{ErrorResponse, ErrorResponses};
+use crate::controller::authserver::RATE_LIMIT_CACHE;
 use crate::model::generated::prelude::User;
 use crate::model::serialized::profile::SerializedProfile;
 use crate::model::serialized::user::SerializedUser;
@@ -14,6 +15,12 @@ use crate::DATABASE;
 pub async fn authenticate(
     Json(request): Json<AuthenticateRequest>,
 ) -> Result<String, ErrorResponse> {
+    let rate = RATE_LIMIT_CACHE.get(&request.username).await.unwrap_or(0);
+    if rate > 10 {
+        return Err(ErrorResponses::InvalidCredentials.into());
+    }
+    RATE_LIMIT_CACHE.insert(request.username.clone(), rate + 1).await;
+    
     let user = User::find()
         .filter(crate::model::generated::user::Column::Email.eq(request.username))
         .one(&*DATABASE)

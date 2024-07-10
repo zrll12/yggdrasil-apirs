@@ -3,10 +3,17 @@ use axum::Json;
 use sea_orm::{EntityTrait, QueryFilter, ColumnTrait};
 use serde::Deserialize;
 use crate::controller::{ErrorResponse, ErrorResponses};
+use crate::controller::authserver::RATE_LIMIT_CACHE;
 use crate::service::password::verify_password;
 use crate::service::token::invalidate_tokens;
 
 pub async fn signout(Json(request): Json<SignoutRequest>) -> Result<StatusCode, ErrorResponse> {
+    let rate = RATE_LIMIT_CACHE.get(&request.username).await.unwrap_or(0);
+    if rate > 10 {
+        return Err(ErrorResponses::InvalidCredentials.into());
+    }
+    RATE_LIMIT_CACHE.insert(request.username.clone(), rate + 1).await;
+    
     let user = crate::model::generated::prelude::User::find()
         .filter(crate::model::generated::user::Column::Email.eq(request.username))
         .one(&*crate::DATABASE)
