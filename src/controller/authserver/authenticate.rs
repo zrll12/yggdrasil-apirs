@@ -10,13 +10,13 @@ use crate::model::serialized::profile::SerializedProfile;
 use crate::model::serialized::user::SerializedUser;
 use crate::service::password::verify_password;
 use crate::service::token::sign_new_token;
-use crate::DATABASE;
+use crate::{AUTH_CONFIG, DATABASE};
 
 pub async fn authenticate(
     Json(request): Json<AuthenticateRequest>,
 ) -> Result<String, ErrorResponse> {
     let rate = RATE_LIMIT_CACHE.get(&request.username).await.unwrap_or(0);
-    if rate > 10 {
+    if rate > AUTH_CONFIG.login_rate_limit {
         return Err(ErrorResponses::InvalidCredentials.into());
     }
     RATE_LIMIT_CACHE.insert(request.username.clone(), rate + 1).await;

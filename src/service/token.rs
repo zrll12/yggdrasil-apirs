@@ -1,15 +1,14 @@
 use std::sync::Arc;
-use std::time::Duration;
 
 use chrono::{DateTime, Utc};
 use lazy_static::lazy_static;
 use moka::future::Cache;
-
+use crate::AUTH_CONFIG;
 use crate::model::serialized::uuid::UuidNoChar;
 
 lazy_static! {
     static ref TOKEN_CACHE: Cache<String, TokenInfo> = Cache::builder()
-        .time_to_live(Duration::from_secs(60 * 60 * 24 * 14)) //available for 14 days
+        .time_to_live(chrono::Duration::days(AUTH_CONFIG.token_keep_days).to_std().unwrap()) //available for 14 days
         .build();
 }
 
@@ -43,7 +42,7 @@ pub async fn sign_new_token(user_id: String, client_token: Option<String>) -> (S
     };
     TOKEN_CACHE.insert(access_token.clone(), token_info).await;
     
-    invalidate_tokens(&user_id, 10).await;
+    invalidate_tokens(&user_id, AUTH_CONFIG.max_token_allowed).await;
 
     (access_token, client_token)
 }
@@ -67,7 +66,7 @@ pub async fn check_token_state(access_token: &str, client_token: Option<String>)
     }
 
     let now = Utc::now();
-    if now - token_info.issued_time > chrono::Duration::days(7) {
+    if now - token_info.issued_time > chrono::Duration::days(AUTH_CONFIG.token_valid_days) {
         return TokenState::TemporallyInvalid;
     }
     TokenState::Valid
@@ -77,7 +76,7 @@ pub async fn invalidate_token(token: &str) {
     TOKEN_CACHE.invalidate(token).await;
 }
 
-pub async fn invalidate_tokens(user_id: &str, keep_alive: u8) {
+pub async fn invalidate_tokens(user_id: &str, keep_alive: u32) {
     let mut tokens = TOKEN_CACHE
         .iter()
         .filter(|(_, token_info)| token_info.user_id == user_id)

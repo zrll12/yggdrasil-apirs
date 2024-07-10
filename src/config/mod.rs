@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use tracing::info;
 
 pub mod core;
+pub mod auth;
 
 pub fn get_config<T>(name: &str) -> T
 where
