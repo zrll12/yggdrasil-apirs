@@ -19,6 +19,7 @@ use migration::{Migrator, MigratorTrait};
 use crate::config::auth::AuthConfig;
 use crate::config::core::CoreConfig;
 use crate::config::get_config;
+use crate::config::texture::TextureConfig;
 
 mod config;
 mod controller;
@@ -28,6 +29,7 @@ mod service;
 lazy_static! {
     static ref CORE_CONFIG: CoreConfig = get_config("core");
     static ref AUTH_CONFIG: AuthConfig = get_config("auth");
+    static ref TEXTURE_CONFIG: TextureConfig = get_config("textures");
     static ref DATABASE: DatabaseConnection = {
         let mut opt = ConnectOptions::new(&CORE_CONFIG.db_uri);
         opt.sqlx_logging(true);

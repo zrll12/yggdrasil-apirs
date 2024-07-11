@@ -4,6 +4,7 @@ use crate::config::core::get_server_base_url;
 use crate::model::generated::profile::Model;
 use crate::model::serialized::properties::Properties;
 use crate::service::crypto::rsa_sign;
+use crate::TEXTURE_CONFIG;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SerializedProfile {
@@ -59,6 +60,24 @@ impl From<Model> for SerializedProfile {
             properties.push(Properties {
                 name: "textures".to_string(),
                 value: base64::engine::general_purpose::STANDARD.encode(textures.as_bytes()),
+                signature: None
+            });
+        }
+        
+        let upload = if TEXTURE_CONFIG.allow_skin && TEXTURE_CONFIG.allow_cape {
+            "skin,cape"
+        } else if TEXTURE_CONFIG.allow_skin {
+            "skin"
+        } else if TEXTURE_CONFIG.allow_cape {
+            "cape"
+        } else { 
+            ""
+        };
+        
+        if upload != "" {
+            properties.push(Properties {
+                name: "uploadableTextures".to_string(),
+                value: upload.to_string(),
                 signature: None
             });
         }

@@ -2,7 +2,7 @@ use axum::Json;
 use sea_orm::QueryFilter;
 use sea_orm::{ColumnTrait, EntityTrait};
 use serde::{Deserialize, Serialize};
-
+use tracing::warn;
 use crate::controller::{ErrorResponse, ErrorResponses};
 use crate::controller::auth_server::RATE_LIMIT_CACHE;
 use crate::model::generated::prelude::User;
@@ -33,6 +33,7 @@ pub async fn authenticate(
     }
 
     let (access_token, client_token) = sign_new_token(user.id.clone(), request.client_token).await;
+    warn!("token: {}", access_token);
 
     let profiles: Vec<SerializedProfile> = crate::model::generated::profile::Entity::find()
         .filter(crate::model::generated::profile::Column::OwnerId.eq(user.id.clone()))

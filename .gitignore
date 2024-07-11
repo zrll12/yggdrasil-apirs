@@ -3,6 +3,7 @@
 /config/
 /logs/
 /keys/
+/textures/
 
 #idea
 /.idea/.gitignore
