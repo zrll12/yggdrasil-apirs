@@ -16,3 +16,7 @@ pub struct SessionInfo {
 pub async fn save_session(server_id: String, info: SessionInfo) {
     SESSION_CACHE.insert(server_id, info).await;
 }
+
+pub async fn get_session_info(server_id: String) -> Option<SessionInfo> {
+    SESSION_CACHE.get(&server_id).await
+}

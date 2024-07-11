@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::config::core::get_server_base_url;
 use crate::model::generated::profile::Model;
 use crate::model::serialized::properties::Properties;
+use crate::service::crypto::rsa_sign;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SerializedProfile {
@@ -31,6 +32,14 @@ pub struct TexturesData {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TextureMeta {
     url: String,
+}
+
+impl SerializedProfile {
+    pub async fn sign(&mut self) {
+        for property in self.properties.iter_mut() {
+            property.signature = Some(rsa_sign(property.value.as_bytes()));
+        }
+    }
 }
 
 impl From<Model> for SerializedProfile {

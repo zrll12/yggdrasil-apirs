@@ -13,7 +13,11 @@ pub async fn get_profile(Path(profile_id): Path<String>, Query(query): Query<Get
         .unwrap()
         .ok_or(StatusCode::NO_CONTENT)?;
     
-    let profile = SerializedProfile::from(profile);
+    let mut profile = SerializedProfile::from(profile);
+    
+    if query.unsigned.is_some() && query.unsigned.unwrap() { 
+        profile.sign().await;
+    }
     
     Ok(serde_json::to_string(&profile).unwrap())
 }
