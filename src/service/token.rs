@@ -3,8 +3,9 @@ use std::sync::Arc;
 use chrono::{DateTime, Utc};
 use lazy_static::lazy_static;
 use moka::future::Cache;
-use crate::AUTH_CONFIG;
+
 use crate::model::serialized::uuid::UuidNoChar;
+use crate::AUTH_CONFIG;
 
 lazy_static! {
     static ref TOKEN_CACHE: Cache<String, TokenInfo> = Cache::builder()
@@ -41,7 +42,7 @@ pub async fn sign_new_token(user_id: String, client_token: Option<String>) -> (S
         available: true,
     };
     TOKEN_CACHE.insert(access_token.clone(), token_info).await;
-    
+
     invalidate_tokens(&user_id, AUTH_CONFIG.max_token_allowed).await;
 
     (access_token, client_token)
@@ -81,12 +82,15 @@ pub async fn invalidate_tokens(user_id: &str, keep_alive: u32) {
         .iter()
         .filter(|(_, token_info)| token_info.user_id == user_id)
         .collect::<Vec<(Arc<String>, TokenInfo)>>();
-    if tokens.len() <= keep_alive as usize { 
+    if tokens.len() <= keep_alive as usize {
         return;
     }
-    
+
     tokens.sort_by_key(|token| token.1.issued_time);
-    let tokens = tokens.iter().map(|(token, _)| token.clone().to_string()).collect::<Vec<String>>();
+    let tokens = tokens
+        .iter()
+        .map(|(token, _)| token.clone().to_string())
+        .collect::<Vec<String>>();
     for token in &tokens[..tokens.len() - keep_alive as usize] {
         TOKEN_CACHE.invalidate(token).await;
     }

@@ -2,6 +2,7 @@ use axum::extract::{Path, Query};
 use axum::http::StatusCode;
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
+
 use crate::model::generated::prelude::Profile;
 use crate::model::serialized::profile::SerializedProfile;
 

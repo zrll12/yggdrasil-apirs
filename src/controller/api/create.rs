@@ -1,10 +1,11 @@
 use axum::Json;
-use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, NotSet};
+use sea_orm::ActiveValue::Set;
 use serde::Deserialize;
-use crate::service::password::generate_password_hash;
+
 use crate::DATABASE;
 use crate::model::serialized::uuid::UuidNoChar;
+use crate::service::password::generate_password_hash;
 
 pub async fn create_user(Json(request): Json<CreateUserRequest>) {
     let profile_id = UuidNoChar::new().to_string();

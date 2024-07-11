@@ -1,19 +1,22 @@
 use axum::http::StatusCode;
 use axum::Json;
-use sea_orm::{EntityTrait, QueryFilter, ColumnTrait};
+use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 use serde::Deserialize;
-use crate::AUTH_CONFIG;
-use crate::controller::{ErrorResponse, ErrorResponses};
+
 use crate::controller::auth_server::RATE_LIMIT_CACHE;
+use crate::controller::{ErrorResponse, ErrorResponses};
 use crate::service::password::verify_password;
 use crate::service::token::invalidate_tokens;
+use crate::AUTH_CONFIG;
 
 pub async fn signout(Json(request): Json<SignoutRequest>) -> Result<StatusCode, ErrorResponse> {
     let rate = RATE_LIMIT_CACHE.get(&request.username).await.unwrap_or(0);
     if rate > AUTH_CONFIG.login_rate_limit {
         return Err(ErrorResponses::InvalidCredentials.into());
     }
-    RATE_LIMIT_CACHE.insert(request.username.clone(), rate + 1).await;
+    RATE_LIMIT_CACHE
+        .insert(request.username.clone(), rate + 1)
+        .await;
 
     let user = crate::model::generated::prelude::User::find()
         .filter(crate::model::generated::user::Column::Email.eq(request.username))
@@ -22,7 +25,7 @@ pub async fn signout(Json(request): Json<SignoutRequest>) -> Result<StatusCode, 
         .unwrap()
         .ok_or(ErrorResponses::InvalidCredentials)?;
     if !verify_password(&request.password, &user.password) {
-        return Err(ErrorResponses::InvalidCredentials.into())
+        return Err(ErrorResponses::InvalidCredentials.into());
     }
     invalidate_tokens(&user.id, 0).await;
 

@@ -1,8 +1,10 @@
 use axum::Json;
-use sea_orm::QueryFilter;
 use sea_orm::{ColumnTrait, EntityTrait};
+use sea_orm::QueryFilter;
 use serde::{Deserialize, Serialize};
 use tracing::warn;
+
+use crate::{AUTH_CONFIG, DATABASE};
 use crate::controller::{ErrorResponse, ErrorResponses};
 use crate::controller::auth_server::RATE_LIMIT_CACHE;
 use crate::model::generated::prelude::User;
@@ -10,7 +12,6 @@ use crate::model::serialized::profile::SerializedProfile;
 use crate::model::serialized::user::SerializedUser;
 use crate::service::password::verify_password;
 use crate::service::token::sign_new_token;
-use crate::{AUTH_CONFIG, DATABASE};
 
 pub async fn authenticate(
     Json(request): Json<AuthenticateRequest>,

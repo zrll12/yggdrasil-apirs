@@ -4,12 +4,12 @@ use std::path::PathBuf;
 use base64::Engine;
 use base64::prelude::BASE64_URL_SAFE_NO_PAD;
 use image::{DynamicImage, EncodableLayout};
-use image::codecs::png::{PngDecoder, PngEncoder};
-use image::io::{Limits, Reader as ImageReader};
-use image::ImageDecoder;
+use image::codecs::png::PngDecoder;
 use image::ImageFormat::Png;
+use image::io::{Limits, Reader as ImageReader};
 use sha2::{Digest, Sha256};
 use tokio::fs::try_exists;
+
 use crate::TEXTURE_CONFIG;
 
 /// Write a file to disk and generate the id of the file

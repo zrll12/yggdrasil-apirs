@@ -1,16 +1,17 @@
-mod api;
-mod auth_server;
-mod session_server;
-
-use axum::{Router};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
+use axum::Router;
 use axum::routing::get;
 use rsa::pkcs1::EncodeRsaPublicKey;
 use rsa::pkcs8::LineEnding;
 use serde::Serialize;
+
 use crate::config::core::get_server_base_url;
 use crate::service::crypto::SIGNATURE_KEY_PAIR;
+
+mod api;
+mod auth_server;
+mod session_server;
 
 pub fn all_routers() -> Router {
     Router::new()

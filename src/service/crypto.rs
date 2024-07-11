@@ -1,12 +1,15 @@
 use std::fs;
 use std::io::Read;
+
 use base64::Engine;
 use lazy_static::lazy_static;
+use log::debug;
 use rand::thread_rng;
-use rsa::pkcs1::{DecodeRsaPrivateKey, EncodeRsaPrivateKey, EncodeRsaPublicKey, DecodeRsaPublicKey};
+use rsa::pkcs1::{
+    DecodeRsaPrivateKey, DecodeRsaPublicKey, EncodeRsaPrivateKey, EncodeRsaPublicKey,
+};
 use rsa::pkcs8::LineEnding;
 use rsa::{Hash, PaddingScheme, RsaPrivateKey, RsaPublicKey};
-use log::debug;
 use sha1::{Digest, Sha1};
 
 lazy_static! {
