@@ -1,4 +1,4 @@
-mod user;
+mod api;
 mod auth_server;
 mod session_server;
 
@@ -15,7 +15,7 @@ use crate::service::crypto::SIGNATURE_KEY_PAIR;
 pub fn all_routers() -> Router {
     Router::new()
         .route("/", get(ping))
-        .nest("/user", user::get_routers())
+        .nest("/api", api::get_routers())
         .nest("/authserver", auth_server::get_routers())
         .nest("/sessionserver/session", session_server::get_routers())
 }
