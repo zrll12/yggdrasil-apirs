@@ -26,7 +26,6 @@ pub async fn write_file(file_content: impl AsRef<[u8]>) -> Option<String> {
     let hasher = hasher.finalize();
 
     let id = format!("{}", BASE64_URL_SAFE_NO_PAD.encode(hasher.as_bytes()));
-    // let id = (&id[1..]).to_string();
 
     let mut path = PathBuf::from("./textures");
     path.push((&id[0..2]).to_string().to_ascii_lowercase());
@@ -38,6 +37,11 @@ pub async fn write_file(file_content: impl AsRef<[u8]>) -> Option<String> {
     limit.max_image_height = Some(TEXTURE_CONFIG.max_height);
     let image = PngDecoder::with_limits(Cursor::new(file_content), limit).unwrap();
     let image = DynamicImage::from_decoder(image).unwrap();
+    
+    if image.width() % 64 != 0 || image.height() % 32 != 0 {
+        return None;
+    }
+    
     let mut image_bytes: Vec<u8> = Vec::new();
     image.write_to(&mut Cursor::new(&mut image_bytes), Png).unwrap();
 

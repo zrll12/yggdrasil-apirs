@@ -1,11 +1,13 @@
+use std::io::Cursor;
 use axum::extract::{Multipart, Path};
-use axum::http::{HeaderMap, StatusCode};
-use log::{debug, warn};
-use sea_orm::ActiveValue::Set;
+use axum::http::{HeaderMap, HeaderName, HeaderValue, StatusCode};
+use image::ImageFormat::Png;
+use log::debug;
 use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter};
+use sea_orm::ActiveValue::Set;
 
 use crate::model::generated::prelude::Profile;
-use crate::service::file::write_file;
+use crate::service::texture::{read_image, write_file};
 use crate::service::token::get_token_info;
 use crate::TEXTURE_CONFIG;
 
@@ -83,18 +85,36 @@ pub async fn upload_texture(
         }
     }
 
-    if file_id == "" {
+    if file_id.is_empty() {
         return StatusCode::BAD_REQUEST;
     }
 
     let mut profile = profile.into_active_model();
     if texture_type == "skin" {
         profile.skin_texture = Set(Some(file_id));
-        profile.model = Set(model_type);
+        if !model_type.is_empty() {
+            profile.model = Set(model_type);
+        }
     } else {
         profile.cape_texture = Set(Some(file_id));
     }
     profile.update(&*crate::DATABASE).await.unwrap();
 
     StatusCode::NO_CONTENT
+}
+
+pub async fn get_texture(Path(texture_id): Path<String>) -> Result<(HeaderMap, Vec<u8>), StatusCode> {
+    let image = read_image(&texture_id).await.ok_or(StatusCode::NOT_FOUND)?;
+    let mut buffer = Vec::new();
+    
+    image.write_to(&mut Cursor::new(&mut buffer), Png).unwrap();
+    
+    let mut headers = HeaderMap::new();
+    headers.insert(
+        HeaderName::from_static("content-type"),
+        HeaderValue::from_str("image/png").unwrap(),
+    );
+
+
+    Ok((headers, buffer))
 }

@@ -2,7 +2,7 @@ use axum::Router;
 use axum::routing::{post, put};
 
 mod create;
-mod texture;
+pub mod texture;
 
 pub fn get_routers() -> Router {
     Router::new()

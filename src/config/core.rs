@@ -19,12 +19,6 @@ pub struct CoreConfig {
     pub ssl_key: String,
     #[serde_inline_default(2)]
     pub max_body_size: usize,
-}
-
-pub fn get_server_base_url() -> String {
-    if CORE_CONFIG.tls {
-        format!("https://{}", CORE_CONFIG.server_addr)
-    } else {
-        format!("http://{}", CORE_CONFIG.server_addr)
-    }
+    #[serde_inline_default(String::from("http://127.0.0.1:7890"))]
+    pub base_url: String,
 }

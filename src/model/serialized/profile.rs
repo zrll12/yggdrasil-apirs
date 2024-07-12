@@ -1,10 +1,10 @@
 use base64::Engine;
 use serde::{Deserialize, Serialize};
-use crate::config::core::get_server_base_url;
+
+use crate::{CORE_CONFIG, TEXTURE_CONFIG};
 use crate::model::generated::profile::Model;
 use crate::model::serialized::properties::Properties;
 use crate::service::crypto::rsa_sign;
-use crate::TEXTURE_CONFIG;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SerializedProfile {
@@ -52,8 +52,8 @@ impl From<Model> for SerializedProfile {
                 profile_id: value.id.clone(),
                 profile_name: value.name.clone(),
                 textures: TexturesData {
-                    skin: value.skin_texture.as_ref().map(|url| TextureMeta { url: get_server_base_url() + "/textures/" + url }),
-                    cape: value.cape_texture.as_ref().map(|url| TextureMeta { url: get_server_base_url() + "/textures/" + url }),
+                    skin: value.skin_texture.as_ref().map(|url| TextureMeta { url: CORE_CONFIG.base_url.clone() + "/textures/" + url }),
+                    cape: value.cape_texture.as_ref().map(|url| TextureMeta { url: CORE_CONFIG.base_url.clone() + "/textures/" + url }),
                 }
             };
             let textures = serde_json::to_string(&textures).unwrap();
