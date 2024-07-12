@@ -3,7 +3,7 @@ use axum::response::{IntoResponse, Response};
 use axum::Router;
 use axum::routing::get;
 use rsa::pkcs1::EncodeRsaPublicKey;
-use rsa::pkcs8::LineEnding;
+use rsa::pkcs8::{EncodePublicKey, LineEnding};
 use serde::Serialize;
 
 use crate::CORE_CONFIG;
@@ -24,9 +24,9 @@ pub fn all_routers() -> Router {
 
 pub async fn ping() -> String {
     let meta = PingMeta {
-        meta: "".to_string(),
+        // meta: "".to_string(),
         skin_domains: vec![CORE_CONFIG.base_url.clone()],
-        signature_publickey: SIGNATURE_KEY_PAIR.1.to_pkcs1_pem(LineEnding::LF).unwrap().to_string(),
+        signature_publickey: SIGNATURE_KEY_PAIR.1.to_public_key_pem(LineEnding::LF).unwrap().to_string(),
     };
     
     serde_json::to_string(&meta).unwrap()
@@ -35,7 +35,7 @@ pub async fn ping() -> String {
 #[derive(Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct PingMeta {
-    pub meta: String,
+    // pub meta: String,
     pub skin_domains: Vec<String>,
     pub signature_publickey: String,
 }

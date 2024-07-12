@@ -1,3 +1,4 @@
+use std::net::SocketAddr;
 use axum::extract::DefaultBodyLimit;
 use axum_server::tls_rustls::RustlsConfig;
 use lazy_static::lazy_static;
@@ -95,7 +96,7 @@ async fn main() {
     } else {
         warn!("HTTPS disabled.");
         axum_server::bind(addr)
-            .serve(app.into_make_service())
+            .serve(app.into_make_service_with_connect_info::<SocketAddr>())
             .await
             .unwrap();
     }

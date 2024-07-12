@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 use serde_inline_default::serde_inline_default;
-use crate::CORE_CONFIG;
 
 #[serde_inline_default]
 #[derive(Serialize, Deserialize, Clone, Debug)]

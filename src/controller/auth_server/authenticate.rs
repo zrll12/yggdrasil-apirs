@@ -2,7 +2,6 @@ use axum::Json;
 use sea_orm::{ColumnTrait, EntityTrait};
 use sea_orm::QueryFilter;
 use serde::{Deserialize, Serialize};
-use tracing::warn;
 
 use crate::{AUTH_CONFIG, DATABASE};
 use crate::controller::{ErrorResponse, ErrorResponses};
