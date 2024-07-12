@@ -34,7 +34,6 @@ pub async fn authenticate(
     }
 
     let (access_token, client_token) = sign_new_token(user.id.clone(), request.client_token).await;
-    warn!("token: {}", access_token);
 
     let profiles: Vec<SerializedProfile> = crate::model::generated::profile::Entity::find()
         .filter(crate::model::generated::profile::Column::OwnerId.eq(user.id.clone()))

@@ -31,7 +31,6 @@ pub async fn upload_texture(
     let token_info = if let Some(a) = get_token_info(&token).await {
         a
     } else {
-        warn!("token: {}", token);
         return StatusCode::UNAUTHORIZED;
     };
 
