@@ -4,7 +4,7 @@ use axum::http::StatusCode;
 use axum::Json;
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 use serde::Deserialize;
-use tracing::debug;
+use tracing::{debug, warn};
 
 use crate::controller::{ErrorResponse, ErrorResponses};
 use crate::DATABASE;
@@ -30,7 +30,7 @@ pub async fn join_server(ConnectInfo(addr): ConnectInfo<SocketAddr>, Json(reques
         return Err(ErrorResponses::AlreadyBind.into())
     }
     
-    debug!("Player {} joined the server at {}.", user.id, addr.to_string());
+    debug!("Player {} joined the server {} at {}.", user.id, request.server_id, addr.to_string());
     
     let session_info = SessionInfo {
         access_token: request.access_token,
@@ -64,6 +64,7 @@ pub async fn has_joined_server(Query(query): Query<HasJoinedRequestQuery>) -> Re
     if profile.name != query.username {
         return Err(StatusCode::NO_CONTENT);
     }
+    debug!("profile: {}", serde_json::to_string(&profile).unwrap());
 
     Ok(serde_json::to_string(&profile).unwrap())
 }

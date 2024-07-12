@@ -6,7 +6,7 @@ use rsa::pkcs1::EncodeRsaPublicKey;
 use rsa::pkcs8::{EncodePublicKey, LineEnding};
 use serde::Serialize;
 
-use crate::CORE_CONFIG;
+use crate::{CORE_CONFIG, TEXTURE_CONFIG};
 use crate::service::crypto::SIGNATURE_KEY_PAIR;
 
 mod api;
@@ -25,7 +25,7 @@ pub fn all_routers() -> Router {
 pub async fn ping() -> String {
     let meta = PingMeta {
         // meta: "".to_string(),
-        skin_domains: vec![CORE_CONFIG.base_url.clone()],
+        skin_domains: TEXTURE_CONFIG.skin_domains.clone(),
         signature_publickey: SIGNATURE_KEY_PAIR.1.to_public_key_pem(LineEnding::LF).unwrap().to_string(),
     };
     

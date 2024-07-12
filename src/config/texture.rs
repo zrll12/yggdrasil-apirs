@@ -12,4 +12,6 @@ pub struct TextureConfig {
     pub max_width: u32,
     #[serde_inline_default(256)]
     pub max_height: u32,
+    #[serde_inline_default(vec![String::from("127.0.0.1:7890")])]
+    pub skin_domains: Vec<String>
 }

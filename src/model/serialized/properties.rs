@@ -4,5 +4,6 @@ use serde::{Deserialize, Serialize};
 pub struct Properties {
     pub name: String,
     pub value: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub signature: Option<String>
 }

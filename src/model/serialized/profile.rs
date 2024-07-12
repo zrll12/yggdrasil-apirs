@@ -24,8 +24,10 @@ pub struct Textures {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct TexturesData {
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "SKIN")]
     pub skin: Option<TextureMeta>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(rename = "CAPE")]
     pub cape: Option<TextureMeta>,
 }
