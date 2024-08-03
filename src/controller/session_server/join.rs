@@ -1,20 +1,23 @@
-use std::net::SocketAddr;
 use axum::extract::{ConnectInfo, Query};
 use axum::http::StatusCode;
 use axum::Json;
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 use serde::Deserialize;
-use tracing::{debug, warn};
+use std::net::SocketAddr;
+use tracing::debug;
 
 use crate::controller::{ErrorResponse, ErrorResponses};
-use crate::DATABASE;
 use crate::model::generated::prelude::{Profile, User};
 use crate::model::serialized::profile::SerializedProfile;
 use crate::service::session::{get_session_info, save_session, SessionInfo};
-use crate::service::token::{check_token_state, get_token_info};
 use crate::service::token::TokenState::Valid;
+use crate::service::token::{check_token_state, get_token_info};
+use crate::DATABASE;
 
-pub async fn join_server(ConnectInfo(addr): ConnectInfo<SocketAddr>, Json(request): Json<JoinRequest>) -> Result<StatusCode, ErrorResponse> {
+pub async fn join_server(
+    ConnectInfo(addr): ConnectInfo<SocketAddr>,
+    Json(request): Json<JoinRequest>,
+) -> Result<StatusCode, ErrorResponse> {
     if check_token_state(&request.access_token, None).await != Valid {
         return Err(ErrorResponses::InvalidToken.into());
     }
@@ -25,27 +28,42 @@ pub async fn join_server(ConnectInfo(addr): ConnectInfo<SocketAddr>, Json(reques
         .await
         .unwrap()
         .ok_or(ErrorResponses::InvalidToken)?;
-    
-    if user.profile_id != request.selected_profile { 
-        return Err(ErrorResponses::AlreadyBind.into())
+
+    if user.profile_id != request.selected_profile {
+        return Err(ErrorResponses::AlreadyBind.into());
     }
-    
-    debug!("Player {} joined the server {} at {}.", user.id, request.server_id, addr.to_string());
-    
+
+    debug!(
+        "Player {} joined the server {} at {}.",
+        user.id,
+        request.server_id,
+        addr.to_string()
+    );
+
     let session_info = SessionInfo {
         access_token: request.access_token,
         client_ip: addr.to_string(),
     };
     save_session(request.server_id, session_info).await;
-    
+
     Ok(StatusCode::NO_CONTENT)
 }
 
-pub async fn has_joined_server(Query(query): Query<HasJoinedRequestQuery>) -> Result<String, StatusCode> {
-    let session_info = get_session_info(query.server_id).await
+pub async fn has_joined_server(
+    Query(query): Query<HasJoinedRequestQuery>,
+) -> Result<String, StatusCode> {
+    let session_info = get_session_info(query.server_id)
+        .await
         .ok_or(StatusCode::NO_CONTENT)?;
 
-    let user = get_token_info(&session_info.access_token).await
+    if query.ip.is_some() {
+        if query.ip.unwrap() != session_info.client_ip {
+            return Err(StatusCode::NO_CONTENT);
+        }
+    }
+
+    let user = get_token_info(&session_info.access_token)
+        .await
         .ok_or(StatusCode::NO_CONTENT)?;
 
     let user = User::find()
@@ -60,7 +78,8 @@ pub async fn has_joined_server(Query(query): Query<HasJoinedRequestQuery>) -> Re
         .one(&*DATABASE)
         .await
         .unwrap()
-        .ok_or(StatusCode::NO_CONTENT)?.into();
+        .ok_or(StatusCode::NO_CONTENT)?
+        .into();
     if profile.name != query.username {
         return Err(StatusCode::NO_CONTENT);
     }
@@ -74,7 +93,7 @@ pub async fn has_joined_server(Query(query): Query<HasJoinedRequestQuery>) -> Re
 pub struct HasJoinedRequestQuery {
     username: String,
     server_id: String,
-    ip: Option<String>
+    ip: Option<String>,
 }
 
 #[derive(Deserialize, Clone, Debug)]
