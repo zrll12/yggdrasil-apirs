@@ -1,9 +1,10 @@
+use axum::http::request;
 use axum::Json;
 use sea_orm::{ColumnTrait, EntityTrait};
 use sea_orm::QueryFilter;
 use serde::{Deserialize, Serialize};
 
-use crate::{AUTH_CONFIG, DATABASE};
+use crate::{AUTH_CONFIG, DATABASE, META_CONFIG};
 use crate::controller::{ErrorResponse, ErrorResponses};
 use crate::controller::auth_server::RATE_LIMIT_CACHE;
 use crate::model::generated::prelude::User;
@@ -21,12 +22,23 @@ pub async fn authenticate(
     }
     RATE_LIMIT_CACHE.insert(request.username.clone(), rate + 1).await;
     
-    let user = User::find()
-        .filter(crate::model::generated::user::Column::Email.eq(request.username))
-        .one(&*DATABASE)
-        .await
-        .unwrap()
-        .ok_or(ErrorResponses::InvalidCredentials)?;
+    let user = if request.username.contains("@") {
+        User::find()
+            .filter(crate::model::generated::user::Column::Email.eq(request.username))
+            .one(&*DATABASE)
+            .await
+            .unwrap()
+            .ok_or(ErrorResponses::InvalidCredentials)? 
+    } else if META_CONFIG.feature.non_email_login { 
+        User::find()
+            .filter(crate::model::generated::user::Column::Username.eq(request.username))
+            .one(&*DATABASE)
+            .await
+            .unwrap()
+            .ok_or(ErrorResponses::InvalidCredentials)?
+    } else { 
+        return Err(ErrorResponses::InvalidCredentials.into());
+    };
 
     if !verify_password(&request.password, &user.password) {
         return Err(ErrorResponses::InvalidCredentials.into());

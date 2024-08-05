@@ -23,6 +23,7 @@ pub async fn create_user(Json(request): Json<CreateUserRequest>) {
     
     crate::model::generated::user::ActiveModel {
         id: Set(user_id),
+        username: NotSet,
         email: Set(request.email),
         password: Set(generate_password_hash(&request.password)),
         profile_id: Set(profile_id),
