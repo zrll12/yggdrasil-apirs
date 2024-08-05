@@ -3,6 +3,7 @@ use axum::extract::DefaultBodyLimit;
 use axum_server::tls_rustls::RustlsConfig;
 use lazy_static::lazy_static;
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
+use shadow_rs::shadow;
 use tower_http::catch_panic::CatchPanicLayer;
 use tower_http::classify::StatusInRangeAsFailures;
 use tower_http::cors::CorsLayer;
@@ -19,6 +20,7 @@ use tracing_subscriber::util::SubscriberInitExt;
 use migration::{Migrator, MigratorTrait};
 use crate::config::auth::AuthConfig;
 use crate::config::core::CoreConfig;
+use crate::config::meta::{MetaConfig};
 use crate::config::get_config;
 use crate::config::texture::TextureConfig;
 
@@ -31,6 +33,7 @@ lazy_static! {
     static ref CORE_CONFIG: CoreConfig = get_config("core");
     static ref AUTH_CONFIG: AuthConfig = get_config("auth");
     static ref TEXTURE_CONFIG: TextureConfig = get_config("textures");
+    static ref META_CONFIG: MetaConfig = get_config("meta");
     static ref DATABASE: DatabaseConnection = {
         let mut opt = ConnectOptions::new(&CORE_CONFIG.db_uri);
         opt.sqlx_logging(true);
@@ -68,7 +71,7 @@ async fn main() {
         .with(formatting_layer)
         .with(file_layer)
         .init();
-
+    
     Migrator::up(&*DATABASE, None).await.unwrap();
 
     let app = controller::all_routers()

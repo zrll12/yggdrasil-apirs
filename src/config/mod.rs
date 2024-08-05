@@ -7,6 +7,7 @@ use tracing::info;
 pub mod core;
 pub mod auth;
 pub mod texture;
+pub mod meta;
 
 pub fn get_config<T>(name: &str) -> T
 where

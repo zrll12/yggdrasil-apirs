@@ -1,17 +1,49 @@
-use axum::http::StatusCode;
+use axum::http::{HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::Router;
 use axum::routing::get;
-use rsa::pkcs1::EncodeRsaPublicKey;
+use lazy_static::lazy_static;
 use rsa::pkcs8::{EncodePublicKey, LineEnding};
 use serde::Serialize;
-
-use crate::{CORE_CONFIG, TEXTURE_CONFIG};
+use serde_json::{Map, Value};
+use shadow_rs::shadow;
+use crate::{META_CONFIG, TEXTURE_CONFIG};
 use crate::service::crypto::SIGNATURE_KEY_PAIR;
 
 mod api;
 mod auth_server;
 mod session_server;
+
+lazy_static! {
+    static ref PING_META: String = {
+        shadow!(build);
+
+        let version = format!("{}-{}", build::SHORT_COMMIT, build::BUILD_RUST_CHANNEL);
+        let mut meta = Map::new();
+
+        meta.insert("serverName".to_string(), Value::String(META_CONFIG.server_name.clone()));
+        meta.insert("implementationName".to_string(), Value::String("Rust api implementation".to_string()));
+        meta.insert("implementationVersion".to_string(), Value::String(version));
+
+
+
+        if META_CONFIG.feature.non_email_login {
+            meta.insert("feature.non_email_login".to_string(), Value::Bool(true));
+        }
+
+        let meta = PingMeta {
+            meta: Value::Object(meta),
+            skin_domains: TEXTURE_CONFIG.skin_domains.clone(),
+            signature_publickey: SIGNATURE_KEY_PAIR
+                .1
+                .to_public_key_pem(LineEnding::LF)
+                .unwrap()
+                .to_string(),
+        };
+
+        serde_json::to_string(&meta).unwrap()
+    };
+}
 
 pub fn all_routers() -> Router {
     Router::new()
@@ -22,30 +54,24 @@ pub fn all_routers() -> Router {
         .nest("/sessionserver/session", session_server::get_routers())
 }
 
-pub async fn ping() -> String {
-    let meta = PingMeta {
-        // meta: "".to_string(),
-        skin_domains: TEXTURE_CONFIG.skin_domains.clone(),
-        signature_publickey: SIGNATURE_KEY_PAIR.1.to_public_key_pem(LineEnding::LF).unwrap().to_string(),
-    };
-    
-    serde_json::to_string(&meta).unwrap()
+pub async fn ping() -> &'static str {
+    &PING_META
 }
 
 #[derive(Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct PingMeta {
-    // pub meta: String,
+    pub meta: Value,
     pub skin_domains: Vec<String>,
     pub signature_publickey: String,
 }
 
 pub enum ErrorResponses {
-    InvalidToken,//令牌无效
-    InvalidCredentials,//密码错误，或短时间内多次登录失败而被暂时禁止登录
-    AlreadyBind,//试图向一个已经绑定了角色的令牌指定其要绑定的角色
-    NoOwnership,//试图向一个令牌绑定不属于其对应用户的角色 （非标准）
-    InvalidProfile,//试图使用一个错误的角色加入服务器
+    InvalidToken,       //令牌无效
+    InvalidCredentials, //密码错误，或短时间内多次登录失败而被暂时禁止登录
+    AlreadyBind,        //试图向一个已经绑定了角色的令牌指定其要绑定的角色
+    NoOwnership,        //试图向一个令牌绑定不属于其对应用户的角色 （非标准）
+    InvalidProfile,     //试图使用一个错误的角色加入服务器
 }
 
 impl ErrorResponses {
@@ -94,10 +120,7 @@ pub struct ErrorResponse {
 
 impl ErrorResponse {
     fn with_cause(self, cause: Option<String>) -> ErrorResponse {
-        ErrorResponse {
-            cause,
-            ..self
-        }
+        ErrorResponse { cause, ..self }
     }
 }
 
