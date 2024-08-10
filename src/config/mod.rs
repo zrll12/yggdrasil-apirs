@@ -21,7 +21,7 @@ where
         .read(true)
         .write(true)
         .create(true)
-        .truncate(true)
+        .truncate(false)
         .open(&file_name)
         .unwrap_or_else(|_| panic!("Cannot open {}", &file_name));
     file.read_to_string(&mut raw_config).unwrap();
