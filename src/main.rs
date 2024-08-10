@@ -1,12 +1,13 @@
 use std::net::SocketAddr;
+
 use axum::extract::DefaultBodyLimit;
+use axum::http::{HeaderName, HeaderValue};
 use axum_server::tls_rustls::RustlsConfig;
 use lazy_static::lazy_static;
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
-use shadow_rs::shadow;
-use tower_http::catch_panic::CatchPanicLayer;
 use tower_http::classify::StatusInRangeAsFailures;
 use tower_http::cors::CorsLayer;
+use tower_http::set_header::SetResponseHeaderLayer;
 use tower_http::trace::TraceLayer;
 use tracing::{debug, info};
 use tracing::log::{LevelFilter, warn};
@@ -18,10 +19,11 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
 use migration::{Migrator, MigratorTrait};
+
 use crate::config::auth::AuthConfig;
 use crate::config::core::CoreConfig;
-use crate::config::meta::{MetaConfig};
 use crate::config::get_config;
+use crate::config::meta::MetaConfig;
 use crate::config::texture::TextureConfig;
 
 mod config;
@@ -82,7 +84,10 @@ async fn main() {
             CORE_CONFIG.max_body_size * 1024 * 1024,
         ))
         .layer(CorsLayer::permissive())
-        .layer(CatchPanicLayer::new());
+        .layer(SetResponseHeaderLayer::if_not_present(
+            HeaderName::from_bytes(b"X-Authlib-Injector-API-Location").unwrap(),
+            HeaderValue::from_static(&META_CONFIG.api_location)
+        ));
 
     let addr = CORE_CONFIG.server_addr.parse().unwrap();
     info!("Listening: {addr}");

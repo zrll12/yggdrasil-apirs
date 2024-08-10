@@ -6,6 +6,8 @@ use serde_inline_default::serde_inline_default;
 pub struct MetaConfig {
     #[serde_inline_default(String::from("rust api"))]
     pub server_name: String,
+    #[serde_inline_default(String::from("http://127.0.0.1:7890/"))]
+    pub api_location: String,
     #[serde_inline_default(FeatureConfig::new())]
     pub feature: FeatureConfig,
 }

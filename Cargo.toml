@@ -16,7 +16,7 @@ tracing-appender = "0.2.3"
 
 #web
 axum = { version = "0.7.5", features = ["multipart"] }
-tower-http = { version = "0.5.2", features = ["catch-panic", "trace", "cors", "sensitive-headers"] }
+tower-http = { version = "0.5.2", features = ["catch-panic", "trace", "cors", "set-header"] }
 axum-server = { version = "0.6.0", features = ["tls-rustls"] }
 
 #serde
