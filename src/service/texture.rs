@@ -22,14 +22,14 @@ use crate::TEXTURE_CONFIG;
 pub async fn write_file(file_content: impl AsRef<[u8]>) -> Option<String> {
     let mut hasher = Sha256::new();
     hasher.update(file_content.as_ref());
-    hasher.update(&file_content.as_ref().len().to_le_bytes());
+    hasher.update(file_content.as_ref().len().to_le_bytes());
     let hasher = hasher.finalize();
 
-    let id = format!("{}", BASE64_URL_SAFE_NO_PAD.encode(hasher.as_bytes()));
+    let id = BASE64_URL_SAFE_NO_PAD.encode(hasher.as_bytes()).to_string();
 
     let mut path = PathBuf::from("./textures");
-    path.push((&id[0..2]).to_string().to_ascii_lowercase());
-    path.push((&id).to_string());
+    path.push(id[0..2].to_string().to_ascii_lowercase());
+    path.push(&id);
     
     // Recode the image
     let mut limit = Limits::default();
@@ -67,8 +67,8 @@ pub async fn write_file(file_content: impl AsRef<[u8]>) -> Option<String> {
 /// returns: ()
 async fn delete_file(file_id: &str) {
     let mut path = PathBuf::from("./textures");
-    path.push((&file_id[0..2]).to_string().to_ascii_lowercase());
-    path.push((&file_id).to_string());
+    path.push(file_id[0..2].to_string().to_ascii_lowercase());
+    path.push(file_id);
 
     if try_exists(&path).await.unwrap() {
         tokio::fs::remove_file(&path).await.unwrap();
@@ -91,8 +91,8 @@ async fn delete_file(file_id: &str) {
 /// ```
 pub async fn read_image(file_id: &str) -> Option<DynamicImage> {
     let mut path = PathBuf::from("./textures");
-    path.push((&file_id[0..2]).to_string().to_ascii_lowercase());
-    path.push((&file_id).to_string());
+    path.push(file_id[0..2].to_string().to_ascii_lowercase());
+    path.push(file_id);
 
     if !try_exists(&path).await.unwrap() {
         return None;

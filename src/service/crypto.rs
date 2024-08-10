@@ -5,11 +5,11 @@ use base64::Engine;
 use lazy_static::lazy_static;
 use log::debug;
 use rand::thread_rng;
-use rsa::pkcs1::{
-    DecodeRsaPrivateKey, DecodeRsaPublicKey, EncodeRsaPrivateKey, EncodeRsaPublicKey,
-};
-use rsa::pkcs8::{EncodePublicKey, LineEnding};
 use rsa::{Hash, PaddingScheme, RsaPrivateKey, RsaPublicKey};
+use rsa::pkcs1::{
+    DecodeRsaPrivateKey, EncodeRsaPrivateKey,
+};
+use rsa::pkcs8::LineEnding;
 use sha1::{Digest, Sha1};
 
 lazy_static! {
@@ -54,6 +54,6 @@ pub fn rsa_sign(data: &[u8]) -> String {
     let hashed_data = hasher.finalize();
     let hash = hashed_data.as_slice();
 
-    let signature = SIGNATURE_KEY_PAIR.0.sign(PaddingScheme::PKCS1v15Sign {hash: Option::from(Hash::SHA1) }, &hash).unwrap();
+    let signature = SIGNATURE_KEY_PAIR.0.sign(PaddingScheme::PKCS1v15Sign {hash: Option::from(Hash::SHA1) }, hash).unwrap();
     base64::engine::general_purpose::STANDARD.encode(&signature)
 }

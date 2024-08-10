@@ -24,7 +24,7 @@ pub fn generate_password_hash(password: &str) -> String {
         .collect();
 
     let hash = pbkdf2_hmac_array::<Sha256, KEY_LEN>(password.as_bytes(), salt.as_bytes(), ITERATIONS);
-    let hash = BASE64_STANDARD.encode(hash.to_vec());
+    let hash = BASE64_STANDARD.encode(hash);
 
     format!("{}${}", salt, hash)
 }
@@ -39,7 +39,7 @@ pub fn verify_password(password: &str, password_hash: &str) -> bool {
     let hash = parts[1];
 
     let hash_calc = pbkdf2_hmac_array::<Sha256, KEY_LEN>(password.as_bytes(), salt.as_bytes(), ITERATIONS).to_vec();
-    let hash_calc = BASE64_STANDARD.encode(hash_calc.to_vec());
+    let hash_calc = BASE64_STANDARD.encode(&hash_calc);
 
     hash_calc == hash
 }

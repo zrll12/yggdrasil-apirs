@@ -56,10 +56,8 @@ pub async fn has_joined_server(
         .await
         .ok_or(StatusCode::NO_CONTENT)?;
 
-    if query.ip.is_some() {
-        if query.ip.unwrap() != session_info.client_ip {
-            return Err(StatusCode::NO_CONTENT);
-        }
+    if query.ip.is_some() && query.ip.unwrap() != session_info.client_ip {
+        return Err(StatusCode::NO_CONTENT);
     }
 
     let user = get_token_info(&session_info.access_token)

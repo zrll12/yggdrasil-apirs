@@ -76,7 +76,7 @@ impl From<Model> for SerializedProfile {
             ""
         };
         
-        if upload != "" {
+        if !upload.is_empty() {
             properties.push(Properties {
                 name: "uploadableTextures".to_string(),
                 value: upload.to_string(),

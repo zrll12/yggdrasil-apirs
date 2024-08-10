@@ -1,4 +1,4 @@
-use axum::http::{HeaderMap, StatusCode};
+use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Router;
 use axum::routing::get;

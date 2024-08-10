@@ -34,7 +34,7 @@ fn new_token() -> String {
 
 pub async fn sign_new_token(user_id: String, client_token: Option<String>) -> (String, String) {
     let access_token = new_token();
-    let client_token = client_token.unwrap_or_else(|| new_token());
+    let client_token = client_token.unwrap_or_else(new_token);
     let token_info = TokenInfo {
         client_token: client_token.clone(),
         user_id: user_id.clone(),
