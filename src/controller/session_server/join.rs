@@ -71,13 +71,18 @@ pub async fn has_joined_server(
         .unwrap()
         .ok_or(StatusCode::NO_CONTENT)?;
 
-    let profile: SerializedProfile = Profile::find()
+    let mut profile: SerializedProfile = Profile::find()
         .filter(crate::model::generated::profile::Column::Id.eq(&user.profile_id))
         .one(&*DATABASE)
         .await
         .unwrap()
         .ok_or(StatusCode::NO_CONTENT)?
         .into();
+    
+    if query.sign.unwrap_or(false) {
+        profile.sign().await;
+    }
+    
     if profile.name != query.username {
         return Err(StatusCode::NO_CONTENT);
     }
@@ -92,6 +97,7 @@ pub struct HasJoinedRequestQuery {
     username: String,
     server_id: String,
     ip: Option<String>,
+    sign: Option<bool>
 }
 
 #[derive(Deserialize, Clone, Debug)]

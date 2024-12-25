@@ -1,22 +1,25 @@
-use std::net::SocketAddr;
-
+use std::fmt::Debug;
+use axum::body::Body;
 use axum::extract::DefaultBodyLimit;
+use axum::http;
 use axum::http::{HeaderName, HeaderValue};
 use axum_server::tls_rustls::RustlsConfig;
 use lazy_static::lazy_static;
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
+use std::net::SocketAddr;
 use tower_http::classify::StatusInRangeAsFailures;
 use tower_http::cors::CorsLayer;
 use tower_http::set_header::SetResponseHeaderLayer;
+use tower_http::trace;
 use tower_http::trace::TraceLayer;
-use tracing::{debug, info};
-use tracing::log::{LevelFilter, warn};
+use tracing::log::{warn, LevelFilter};
+use tracing::{debug, info, Level, Span};
 use tracing_appender::non_blocking;
 use tracing_appender::rolling::{RollingFileAppender, Rotation};
-use tracing_subscriber::{EnvFilter, fmt, Registry};
 use tracing_subscriber::fmt::time::ChronoLocal;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
+use tracing_subscriber::{fmt, EnvFilter, Registry};
 
 use migration::{Migrator, MigratorTrait};
 
@@ -56,8 +59,7 @@ async fn main() {
     let file_appender = RollingFileAppender::builder()
         .rotation(Rotation::DAILY)
         .filename_suffix("log")
-        .filename_prefix("logs/")
-        .build("")
+        .build("logs")
         .unwrap();
     let (non_blocking_appender, _guard) = non_blocking(file_appender);
 
@@ -73,20 +75,23 @@ async fn main() {
         .with(formatting_layer)
         .with(file_layer)
         .init();
-    
+
     Migrator::up(&*DATABASE, None).await.unwrap();
 
+    let trace_layer =
+        TraceLayer::new(StatusInRangeAsFailures::new(400..=599).into_make_classifier())
+            .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
+            .on_response(trace::DefaultOnResponse::new().level(Level::INFO));
+
     let app = controller::all_routers()
-        .layer(TraceLayer::new(
-            StatusInRangeAsFailures::new(400..=599).into_make_classifier(),
-        ))
+        .layer(trace_layer)
         .layer(DefaultBodyLimit::max(
             CORE_CONFIG.max_body_size * 1024 * 1024,
         ))
         .layer(CorsLayer::permissive())
         .layer(SetResponseHeaderLayer::if_not_present(
             HeaderName::from_bytes(b"X-Authlib-Injector-API-Location").unwrap(),
-            HeaderValue::from_static(&META_CONFIG.api_location)
+            HeaderValue::from_static(&META_CONFIG.api_location),
         ));
 
     let addr = CORE_CONFIG.server_addr.parse().unwrap();
