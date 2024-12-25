@@ -1,0 +1,13 @@
+# Below, only the most basic configuration is provided.
+# You can refer to the template file to complete all configurations.
+
+# Please edit before use.
+id: -1
+
+name: 'Yggdrasil'
+# Don't change it unless you really want to.
+serviceType: CUSTOM_YGGDRASIL
+yggdrasilAuth:
+  custom:
+    url: 'https://link-to-your-server.com/sessionserver/session/minecraft/hasJoined?username={username}&serverId={serverId}&sign=true'
+    method: 'GET'
