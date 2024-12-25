@@ -1,6 +1,6 @@
-# Minecraft Yggdrasil API in Rust
+# yggdrasil-rs-server
 
-This project is a Rust implementation of the Minecraft Yggdrasil API.
+This project is a Rust server implementation of the Minecraft Yggdrasil API.
 
 Implements [authlib-injector](https://github.com/yushijinhun/authlib-injector)
 
