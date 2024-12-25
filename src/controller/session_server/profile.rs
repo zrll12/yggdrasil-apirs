@@ -16,7 +16,7 @@ pub async fn get_profile(Path(profile_id): Path<String>, Query(query): Query<Get
 
     let mut profile = SerializedProfile::from(profile);
 
-    if query.unsigned.unwrap_or(false) {
+    if !query.unsigned.unwrap_or(true) {
         profile.sign().await;
     }
 

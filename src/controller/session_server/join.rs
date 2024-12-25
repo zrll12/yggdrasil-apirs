@@ -79,7 +79,7 @@ pub async fn has_joined_server(
         .ok_or(StatusCode::NO_CONTENT)?
         .into();
     
-    if query.sign.unwrap_or(false) {
+    if !query.unsigned.unwrap_or(false) {
         profile.sign().await;
     }
     
@@ -97,7 +97,7 @@ pub struct HasJoinedRequestQuery {
     username: String,
     server_id: String,
     ip: Option<String>,
-    sign: Option<bool>
+    unsigned: Option<bool>
 }
 
 #[derive(Deserialize, Clone, Debug)]

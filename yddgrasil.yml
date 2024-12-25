@@ -9,5 +9,5 @@ name: 'Yggdrasil'
 serviceType: CUSTOM_YGGDRASIL
 yggdrasilAuth:
   custom:
-    url: 'https://link-to-your-server.com/sessionserver/session/minecraft/hasJoined?username={username}&serverId={serverId}&sign=true'
+    url: 'https://link-to-your-server.com/sessionserver/session/minecraft/hasJoined?username={username}&serverId={serverId}'
     method: 'GET'
